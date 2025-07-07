@@ -1,11 +1,13 @@
 #!/bin/bash
 
-pid=""
-outer="false"
+pid="false"
+v4="false"
 
 for arg in "$@"; do
-  if [ "$arg" = "-o" ]; then
-    outer="true"
+  if [ "$arg" = "-4" ]; then
+    v4="true"
+  elif [ "$arg" = "-6" ]; then
+    v4="false"
   else
     pid="$arg"
   fi
@@ -17,13 +19,15 @@ if [ "$pid" = "" ]; then
   exit 1
 fi
 
-pid_hex=$(printf "%08x" $pid)
+pid_hex=$(printf "%06x" $pid)
 ip=""
 
-if [ "$outer" = "true" ]; then
-  ip="::1:${pid_hex:0:4}:${pid_hex:4:4}"
+if [ "$v4" = "true" ]; then
+  # 240.0.0.0/4 for experimental use
+  ip="240.$((0x${pid_hex:0:2})).$((0x${pid_hex:2:2})).$((0x${pid_hex:4:2}))"
 else
-  ip="::${pid_hex:0:4}:${pid_hex:4:4}"
+  # I THINK this falls under the depracated IPv4-Compatible block...
+  ip="::${pid_hex:0:2}:${pid_hex:2:4}"
 fi
 
 echo "$ip"

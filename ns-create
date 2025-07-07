@@ -9,15 +9,34 @@ fi
 
 pid="$1"
 ns="ns-$pid"
-inner_ip="$(pid2ip "$pid")"
-outer_ip="$(pid2ip "$pid" -o)"
+ipv6="$(pid2ip "$pid")"
+ipv4="$(pid2ip "$pid" -4)"
 
+# create network namespace
 ip netns add $ns
 if [ $? -ne 0 ]; then
   echo "cannot create namespace for PID $pid"
   exit 1
 fi
 
+# enable loopback
 ip -n "$ns" link set dev lo up
 
+# add a virtual ethernet between namespaces
+veth_in="veth-in-$pid"
+veth_out="veth-out-$pid"
+ip link add "$veth_in" type veth peer name "$veth_out"
+ip link set "$veth_in" netns "$ns"
+
+ip link set dev "$veth_out" up
+ip -n "$ns" link set dev "$veth_in" up
+
+# bind to bridge
+ip link set dev "$veth_out" master ns-bridge
+
+# setup ip addressing
+ip -n "$ns" addr add "$ipv6/96" dev "$veth_in" 
+ip -n "$ns" addr add "$ipv4/8" dev "$veth_in" 
+
 ip -n "$ns" add
+echo "$ns"

@@ -1,0 +1,16 @@
+#!/bin/bash
+
+PATH="$PATH:$(dirname "$0")"
+
+sysctl net.ipv4.ip_forward=1
+sysctl net.ipv6.conf.default.forwarding=1
+
+ip link add name ns-bridge type bridge
+ip link set ns-bridge up
+
+# takes place of PID 1, which should not be included anyways
+
+# 240.0.0.0/4 for experimental use
+ip addr add 240.0.0.1/8 dev ns-bridge
+# I THINK this falls under the depracated IPv4-Compatible block...
+ip addr add ::FFFF:1/96 dev ns-bridge

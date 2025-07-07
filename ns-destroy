@@ -9,7 +9,6 @@ fi
 
 pid="$1"
 ns="ns-$pid"
-inner_ip="$(pid2ip "$pid")"
-outer_ip="$(pid2ip "$pid" -o)"
 
+# also destroys the virtual ethernet
 ip netns del "$ns"
