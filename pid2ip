@@ -1,0 +1,30 @@
+#!/bin/bash
+
+pid=""
+outer="false"
+
+for arg in "$@"; do
+  if [ "$arg" = "-o" ]; then
+    outer="true"
+  else
+    pid="$arg"
+  fi
+done
+
+if [ "$pid" = "" ]; then
+  echo "usage: $0 <pid> [-o]"
+  echo "  -o  outer address"
+  exit 1
+fi
+
+pid_hex=$(printf "%08x" $pid)
+ip=""
+
+if [ "$outer" = "true" ]; then
+  ip="::1:${pid_hex:0:4}:${pid_hex:4:4}"
+else
+  ip="::${pid_hex:0:4}:${pid_hex:4:4}"
+fi
+
+echo "$ip"
+exit 0
