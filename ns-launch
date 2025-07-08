@@ -2,12 +2,10 @@
 
 PATH="$PATH:$(dirname "$0")"
 
-if [ "$#" -eq 0 ]; then
-  echo "usage: $0 <command> [command flags]"
+if [ "$#" -lt 2 ]; then
+  echo "usage: $0 <user> <command> [command flags]"
 fi
 
 ns="$(ns-create $$)"
 
-echo "$ns"
-
-exec ip netns exec "$ns" $@
+exec ip netns exec "$ns" sudo -Eu "$@"

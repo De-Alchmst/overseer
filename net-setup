@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# requires in sudoers file
+# Defaults !secure_path
+
 PATH="$PATH:$(dirname "$0")"
 
 sysctl net.ipv4.ip_forward=1
