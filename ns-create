@@ -42,10 +42,4 @@ ip -n "$ns" addr add "$ipv4/8" dev "$veth_in"
 ip -n "$ns" route add default via ::FFFF:1
 ip -n "$ns" route add default via 240.0.0.1
 
-ip -n "$ns" add
-ip -n "$ns" route
-ip -n "$ns" -6 route
-ip netns exec "$ns" bash
-
-./ns-destroy "$pid"
 echo "$ns"
