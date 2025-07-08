@@ -14,3 +14,9 @@ ip link set ns-bridge up
 ip addr add 240.0.0.1/8 dev ns-bridge
 # I THINK this falls under the depracated IPv4-Compatible block...
 ip addr add ::FFFF:1/96 dev ns-bridge
+
+# add NAT, so that we can internet
+iptables -P FORWARD ACCEPT
+iptables -t nat -A POSTROUTING -s 240.0.0.0/8 -j MASQUERADE
+ip6tables -P FORWARD ACCEPT
+ip6tables -t nat -A POSTROUTING -s ::/96 -j MASQUERADE

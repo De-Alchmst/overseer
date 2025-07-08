@@ -38,5 +38,14 @@ ip link set dev "$veth_out" master ns-bridge
 ip -n "$ns" addr add "$ipv6/96" dev "$veth_in" 
 ip -n "$ns" addr add "$ipv4/8" dev "$veth_in" 
 
+# and routing
+ip -n "$ns" route add default via ::FFFF:1
+ip -n "$ns" route add default via 240.0.0.1
+
 ip -n "$ns" add
+ip -n "$ns" route
+ip -n "$ns" -6 route
+ip netns exec "$ns" bash
+
+./ns-destroy "$pid"
 echo "$ns"
