@@ -23,8 +23,9 @@ fi
 ip -n "$ns" link set dev lo up
 
 # add a virtual ethernet between namespaces
-veth_in="veth-in-$pid"
-veth_out="veth-out-$pid"
+# problem with long names...
+veth_in="v-in-$pid"
+veth_out="v-out-$pid"
 ip link add "$veth_in" type veth peer name "$veth_out"
 ip link set "$veth_in" netns "$ns"
 
