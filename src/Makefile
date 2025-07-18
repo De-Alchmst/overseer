@@ -1,4 +1,4 @@
-object_files :=
+object_files := process.o
 
 CC = gcc
 CFLAGS = -Wall -pedantic -std=c99

@@ -1,18 +1,30 @@
 #include <stdio.h>
+#include <string.h>
 
+#include "process.h"
+
+void help();
 
 int main(int argc, char *argv[]) {
-    if (argc < 2) {
-        fprintf(stderr, "Usage: %s <command> [flags]\n", argv[0]);
+    if (argc < 3) {
+        help();
         return 1;
     }
 
-    // Simulate command execution
-    printf("Executing command: %s\n", argv[1]);
+    if (strcmp(argv[1], "--help") == 0 || strcmp(argv[1], "-h") == 0) {
+        help();
+        return 0;
+    }
 
-    // Here you would add the logic to handle the command
-    // For now, we just print a success message
-    printf("Command '%s' executed successfully.\n", argv[1]);
+    char* user    = argv[1]; 
+    char* command = argv[2];
+
+    launch(user, command, argv + 3);
 
     return 0;
+}
+
+
+void help() {
+    printf("Usage: overseer <user> <command> [args...]\n");
 }
