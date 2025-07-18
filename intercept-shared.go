@@ -53,8 +53,6 @@ func (si *SyscallInterceptor) interceptOpen(regs *unix.PtraceRegs) error {
         return err
     }
     
-    fmt.Printf("INTERCEPT: open(\"%s\", %d, %d)\n", filename, getArg2(regs), getArg3(regs))
-    
     // Example: Block access to /etc/passwd
     if filename == "/etc/passwd" {
         fmt.Println("BLOCKED: Access to /etc/passwd denied!")
@@ -72,8 +70,6 @@ func (si *SyscallInterceptor) interceptOpenat(regs *unix.PtraceRegs) error {
     if err != nil {
         return err
     }
-    
-    fmt.Printf("INTERCEPT: openat(%d, \"%s\", %d, %d)\n", getArg1(regs), filename, getArg3(regs), getArg4(regs))
     
     // Example: Redirect file access
     if filename == "/tmp/secret.txt" {
@@ -152,28 +148,24 @@ func (si *SyscallInterceptor) handleSyscall(regs *unix.PtraceRegs, entering bool
     syscallNum := getSyscallNum(regs)
     
     if entering {
-        fmt.Printf("ENTERING syscall %d\n", syscallNum)
-        
         switch syscallNum {
-        case unix.SYS_OPEN:
-            return si.interceptOpen(regs)
-        case unix.SYS_OPENAT:
-            return si.interceptOpenat(regs)
-        case unix.SYS_WRITE:
-            return si.interceptWrite(regs)
+        // case unix.SYS_OPEN:
+        //     return si.interceptOpen(regs)
+        // case unix.SYS_OPENAT:
+        //     return si.interceptOpenat(regs)
+        // case unix.SYS_WRITE:
+        //     return si.interceptWrite(regs)
         default:
             // Don't intercept other syscalls
             return nil
         }
     } else {
         retVal := si.getReturnValue(regs)
-        fmt.Printf("EXITING syscall %d, return value: %d\n", syscallNum, int64(retVal))
         
         // Handle syscall exit if needed
         switch syscallNum {
         case unix.SYS_OPEN, unix.SYS_OPENAT:
             if int64(retVal) >= 0 {
-                fmt.Printf("File descriptor: %d\n", retVal)
             } else {
                 fmt.Printf("Error: %d\n", int64(retVal))
             }
