@@ -1,5 +1,8 @@
+#define _POSIX_C_SOURCE 200809L // needed for sigaction to be enabled
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "launch.h"
 #include "quit.h"
@@ -7,6 +10,8 @@
 int quit = 0;
 
 void help();
+void terminate(int signum);
+
 
 int main(int argc, char *argv[]) {
     if (argc < 3) {
@@ -23,6 +28,13 @@ int main(int argc, char *argv[]) {
     char* command = argv[2];
     printf("%d\n", quit);
 
+    // on SIGTERM, just set quit to 1
+    struct sigaction action = {
+        .sa_handler = terminate,
+        .sa_flags = 0
+    };
+    sigaction(SIGTERM, &action, NULL);
+
     launch(user, command, argv + 3);
 
     while (!quit) {}
@@ -33,4 +45,9 @@ int main(int argc, char *argv[]) {
 
 void help() {
     printf("Usage: overseer <user> <command> [args...]\n");
+}
+
+
+void terminate(int signum) {
+    quit = 1;
 }

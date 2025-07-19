@@ -8,10 +8,12 @@
 
 #include "launch.h"
 #include "process.h"
+#include "quit.h"
 
 void handleChild(char* user, char* command, char* args[]);
 void handleParent(pid_t pid);
 
+// Only used to launch the initial process
 void launch(char* user, char* command, char* args[]) {
 	pid_t pid = fork();
 
@@ -37,7 +39,9 @@ void handleChild(char* user, char* command, char* args[]) {
 
 void handleParent(pid_t pid) {
     pthread_t thread_id;
-    printf("Parent process: %d, waiting for child process: %d\n", getpid(), pid);
     pthread_create(&thread_id, NULL, handleProcess, (void*)&pid);
-    // handleProcess((void*)&pid);
+
+    // terminate after the main process quits 
+    pthread_join(thread_id, NULL);
+    quit = 1;
 }

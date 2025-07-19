@@ -7,6 +7,7 @@
 
 #include "intercept.h"
 
+// TODO: ARM support
 #ifdef __x86_64__
 #define SYSCALL_CODE(regs) ((regs)->orig_rax)
 #define ARG1(regs)         ((regs)->rdi     )
@@ -36,6 +37,7 @@ void handleSyscall(pid_t pid, struct user_regs_struct* regs, int* entering) {
                        SYSCALL_CODE(regs) == CODE_CLONE ||
                        SYSCALL_CODE(regs) == CODE_CLONE3)) {
 
+        // invalid syscall, just grab the next one
         if (RETURN_VALUE(regs) == CODE_INVALID) {
             *entering = !*entering;
             return;
@@ -44,17 +46,4 @@ void handleSyscall(pid_t pid, struct user_regs_struct* regs, int* entering) {
         printf("  PID: %d\n", pid);
         printf("  Return value: %lld\n", RETURN_VALUE(regs));
     }
-
-    // if (entering) {
-    //     if (SYSCALL_CODE(regs) == CODE_EXECVE) {
-    //         printf("Intercepted execve syscall:\n");
-    //         printf("  PID: %d\n", pid);
-    //         printf("  Command: %s\n", (char*)ARG1(regs));
-    //         printf("  Command: %s\n", (char*)ARG3(regs));
-    //         printf("  Command: %s\n", (char*)ARG2(regs));
-    //         printf("  Command: %lld\n", ARG4(regs));
-    //         printf("  Command: %lld\n", ARG5(regs));
-    //         printf("  Command: %lld\n", ARG6(regs));
-    //     }
-    // }
 }
