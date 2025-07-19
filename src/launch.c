@@ -29,11 +29,6 @@ void launch(char* user, char* command, char* args[]) {
 
 
 void handleChild(char* user, char* command, char* args[]) {
-	if (ptrace(PTRACE_TRACEME, 0, NULL, NULL) < 0) {
-		perror("ptrace failed");
-		exit(1);
-	}
-
 	execvp(command, args);
 	perror("execvp failed");
 	exit(1);
@@ -42,5 +37,7 @@ void handleChild(char* user, char* command, char* args[]) {
 
 void handleParent(pid_t pid) {
     pthread_t thread_id;
+    printf("Parent process: %d, waiting for child process: %d\n", getpid(), pid);
     pthread_create(&thread_id, NULL, handleProcess, (void*)&pid);
+    // handleProcess((void*)&pid);
 }

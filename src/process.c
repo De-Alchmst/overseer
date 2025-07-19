@@ -7,7 +7,9 @@
 
 #include "process.h"
 #include "intercept.h"
+#include "quit.h"
 
+// TODO: implement TRACEGOOD
 void* handleProcess(void* args) {
     pid_t pid = *((pid_t*)args);
 
@@ -15,31 +17,38 @@ void* handleProcess(void* args) {
 	int entering = 0;
 	struct user_regs_struct regs;
 
-	for (;;) {
-		if (waitpid(pid, &status, 0) < 0) {
-			perror("waitpid failed");
-			exit(1);
-		}
+    if (ptrace(PTRACE_ATTACH, pid, NULL, NULL) != -1) {
+        trace_pid = waitpid(-1, &status, __WALL);
+        ptrace(PTRACE_SETOPTIONS, pid, NULL, PTRACE_O_TRACEFORK
+                                           | PTRACE_O_TRACEVFORK
+                                           | PTRACE_O_TRACECLONE
+                                           | PTRACE_O_TRACEEXIT);
+        while (!quit) {
+            if (waitpid(pid, &status, 0) < 0) {
+                perror("waitpid failed");
+                break;
+            }
 
-		if (WIFEXITED(status)) {
-			printf("Child exited with status %d\n", WEXITSTATUS(status));
-			break;
-		}
+            if (WIFEXITED(status)) {
+                printf("Child exited with status %d\n", WEXITSTATUS(status));
+                break;
+            }
 
-		if (ptrace(PTRACE_GETREGS, pid, NULL, &regs) == -1) {
-			perror("ptrace PTRACE_GETREGS failed");
-			exit(1);
-		}
+            if (ptrace(PTRACE_GETREGS, pid, NULL, &regs) == -1) {
+                perror("ptrace PTRACE_GETREGS failed");
+                break;
+            }
 
-        handleSyscall(pid, &regs, &entering);
+            handleSyscall(pid, &regs, &entering);
 
-		if (ptrace(PTRACE_SYSCALL, pid, 0, 0) == -1) {
-			perror("ptrace PTRACE_SYSCALL failed");
-			exit(1);
-		}
+            if (ptrace(PTRACE_SYSCALL, pid, 0, 0) == -1) {
+                perror("ptrace PTRACE_SYSCALL failed");
+                break;
+            }
 
-		entering = !entering;
-	}
+            entering = !entering;
+        }
+    }
 
     return NULL;
 }

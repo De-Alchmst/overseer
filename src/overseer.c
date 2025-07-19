@@ -2,6 +2,9 @@
 #include <string.h>
 
 #include "launch.h"
+#include "quit.h"
+
+int quit = 0;
 
 void help();
 
@@ -18,8 +21,11 @@ int main(int argc, char *argv[]) {
 
     char* user    = argv[1]; 
     char* command = argv[2];
+    printf("%d\n", quit);
 
     launch(user, command, argv + 3);
+
+    while (!quit) {}
 
     return 0;
 }

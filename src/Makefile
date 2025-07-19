@@ -3,8 +3,8 @@ object_files := launch.o process.o intercept.o
 CC = gcc
 CFLAGS = -Wall -pedantic -std=c99
 
-overseer: $(object_files)
-	$(CC) $(CFLAGS) $^ -o overseer overseer.c
+overseer: $(object_files) overseer.c
+	$(CC) $(CFLAGS) $^ -o overseer
 
 # Define a pattern rule that compiles every .c file into a .o file
 %.o : %.c
