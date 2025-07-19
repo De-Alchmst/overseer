@@ -1,1 +1,3 @@
-void launch(char* user, char* command, char* args[]);
+#include <unistd.h>
+
+void* handleProcess(void* args); // pid_t* as args

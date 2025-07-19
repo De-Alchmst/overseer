@@ -1,4 +1,4 @@
-object_files := process.o intercept.o
+object_files := launch.o process.o intercept.o
 
 CC = gcc
 CFLAGS = -Wall -pedantic -std=c99

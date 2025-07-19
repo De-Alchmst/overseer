@@ -8,38 +8,9 @@
 #include "process.h"
 #include "intercept.h"
 
-void handleChild(char* user, char* command, char* args[]);
-void handleParent(pid_t pid);
+void* handleProcess(void* args) {
+    pid_t pid = *((pid_t*)args);
 
-void launch(char* user, char* command, char* args[]) {
-	pid_t pid = fork();
-
-	if (pid < 0) {
-		perror("Fork failed");
-		exit(1);
-	}
-
-	if (pid == 0) {
-		handleChild(user, command, args);
-	} else {
-		handleParent(pid);
-	}
-}
-
-
-void handleChild(char* user, char* command, char* args[]) {
-	if (ptrace(PTRACE_TRACEME, 0, NULL, NULL) < 0) {
-		perror("ptrace failed");
-		exit(1);
-	}
-
-	execvp(command, args);
-	perror("execvp failed");
-	exit(1);
-}
-
-
-void handleParent(pid_t pid) {
 	int status = 0;
 	int entering = 0;
 	struct user_regs_struct regs;
@@ -55,7 +26,7 @@ void handleParent(pid_t pid) {
 			break;
 		}
 
-		if (ptrace(PTRACE_GETREGS, pid, NULL, &regs) < 0) {
+		if (ptrace(PTRACE_GETREGS, pid, NULL, &regs) == -1) {
 			perror("ptrace PTRACE_GETREGS failed");
 			exit(1);
 		}
@@ -69,4 +40,6 @@ void handleParent(pid_t pid) {
 
 		entering = !entering;
 	}
+
+    return NULL;
 }
