@@ -1,11 +1,11 @@
 #include <stdio.h>
-#include <stdlib.h>
-#include <sys/ptrace.h>
 #include <sys/user.h>
-#include <sys/wait.h>
 #include <unistd.h>
+#include <pthread.h>
+#include <stdlib.h>
 
 #include "intercept.h"
+#include "process.h"
 
 // TODO: ARM support
 #ifdef __x86_64__
@@ -31,19 +31,27 @@
 
 // TODO: handle CLONE_THREAD
 
+// Will attach new handleProcess to new processes created by fork, vfork, clone,
+// or clone3 syscalls.
 void handleSyscall(pid_t pid, struct user_regs_struct* regs, int* entering) {
     if (!*entering && (SYSCALL_CODE(regs) == CODE_FORK  ||
                        SYSCALL_CODE(regs) == CODE_VFORK ||
                        SYSCALL_CODE(regs) == CODE_CLONE ||
                        SYSCALL_CODE(regs) == CODE_CLONE3)) {
 
+        pid_t* child_pid = malloc(sizeof(pid_t));
+        *child_pid = RETURN_VALUE(regs);
+
         // invalid syscall, just grab the next one
-        if (RETURN_VALUE(regs) == CODE_INVALID) {
+        if (*child_pid == CODE_INVALID) {
             *entering = !*entering;
             return;
         }
-        printf("Intercepted fork syscall:\n");
-        printf("  PID: %d\n", pid);
-        printf("  Return value: %lld\n", RETURN_VALUE(regs));
+
+        printf("Intercepted syscall %lld, child pid: %d\n", SYSCALL_CODE(regs), *child_pid);
+
+        pthread_t thread_id;
+        pthread_create(&thread_id, NULL, handleProcess, (void*)child_pid);
+        pthread_detach(thread_id);
     }
 }

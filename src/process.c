@@ -17,13 +17,10 @@ void* handleProcess(void* args) {
 	int entering = 0;
 	struct user_regs_struct regs;
 
+    printf("Attaching to process %d...\n", pid);
     if (ptrace(PTRACE_ATTACH, pid, NULL, NULL) != -1) {
-        ptrace(PTRACE_SETOPTIONS, pid, NULL, PTRACE_O_TRACEFORK
-                                           | PTRACE_O_TRACEVFORK
-                                           | PTRACE_O_TRACECLONE
-                                           | PTRACE_O_TRACEEXIT);
         while (!quit) {
-            if (waitpid(-1, &status, __WALL) < 0) {
+            if (waitpid(pid, &status, __WALL) < 0) {
                 perror("waitpid failed");
                 break;
             }

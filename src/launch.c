@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/ptrace.h>
 #include <sys/user.h>
-#include <sys/wait.h>
 #include <unistd.h>
 #include <pthread.h>
 

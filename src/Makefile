@@ -1,7 +1,7 @@
 object_files := launch.o process.o intercept.o
 
 CC = gcc
-CFLAGS = -Wall -pedantic -std=c99
+CFLAGS = -Wall -pedantic
 
 overseer: $(object_files) overseer.c
 	$(CC) $(CFLAGS) $^ -o overseer
