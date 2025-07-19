@@ -6,10 +6,10 @@
 #include <unistd.h>
 
 #include "process.h"
+#include "intercept.h"
 
 void handleChild(char* user, char* command, char* args[]);
 void handleParent(pid_t pid);
-
 
 void launch(char* user, char* command, char* args[]) {
 	pid_t pid = fork();
@@ -41,7 +41,7 @@ void handleChild(char* user, char* command, char* args[]) {
 
 void handleParent(pid_t pid) {
 	int status = 0;
-	short entering = 1;
+	int entering = 0;
 	struct user_regs_struct regs;
 
 	for (;;) {
@@ -60,11 +60,7 @@ void handleParent(pid_t pid) {
 			exit(1);
 		}
 
-		if (entering) {
-			printf("Entering syscall %lld\n", regs.orig_rax);
-		} else {
-			printf("Exiting syscall %lld\n", regs.orig_rax);
-		}
+        handleSyscall(pid, &regs, &entering);
 
 		if (ptrace(PTRACE_SYSCALL, pid, 0, 0) == -1) {
 			perror("ptrace PTRACE_SYSCALL failed");
