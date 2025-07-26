@@ -4,6 +4,7 @@ PATH="$PATH:$(dirname "$0")"
 
 if [ "$#" -lt 2 ]; then
   echo "usage: $0 <user> <command> [command flags]"
+  exit 1
 fi
 
 ns="$(ns-create $$)"

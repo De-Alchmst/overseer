@@ -1,0 +1,19 @@
+#!/bin/bash
+
+PATH="$PATH:$(dirname "$0")"
+
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+  echo "usage: $0 <user> <PID> [destination namespace]"
+  exit 1
+fi
+
+user="$1"
+pid="$2"
+ns="$3"
+
+if [ "$ns" == "" ]; then
+  ns="$(ns-create $pid)"
+fi
+
+echo $pid $ns
+
